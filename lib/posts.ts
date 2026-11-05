@@ -32,6 +32,7 @@ export type BlogPost = {
   coverImage: string;
   coverAlt: string;
   relatedSlugs: string[];
+  showRelated?: boolean;
   blocks: ContentBlock[];
 };
 

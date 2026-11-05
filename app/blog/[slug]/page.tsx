@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import ArticleRichText from "@/components/article-rich-text";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
@@ -17,15 +16,6 @@ type BlogDetailProps = {
 };
 
 export const dynamic = "force-dynamic";
-
-function canOptimizeImage(src: string): boolean {
-  try {
-    const hostname = new URL(src).hostname;
-    return hostname === "images.unsplash.com" || hostname.endsWith(".public.blob.vercel-storage.com");
-  } catch {
-    return src.startsWith("/") && !src.startsWith("//");
-  }
-}
 
 export async function generateMetadata({ params }: BlogDetailProps): Promise<Metadata> {
   const { slug } = await params;
@@ -77,22 +67,21 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                 <span>02</span>
                 <p>Article</p>
               </a>
-              <a href="#article-related">
-                <span>03</span>
-                <p>Related links</p>
-              </a>
+              {post.showRelated !== false && relatedPosts.length > 0 ? (
+                <a href="#article-related">
+                  <span>03</span>
+                  <p>Related links</p>
+                </a>
+              ) : null}
             </aside>
 
             <article className="article-content" id="article-start">
               <div className="article-cover image-cover" id="article-content">
-                <Image
+                {/* Native image sizing uses each source's actual dimensions and keeps its original ratio. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={post.coverImage}
                   alt={post.coverAlt}
-                  width={1600}
-                  height={900}
-                  priority
-                  sizes="(max-width: 820px) 100vw, 760px"
-                  unoptimized={!canOptimizeImage(post.coverImage)}
                 />
               </div>
 
@@ -114,13 +103,10 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                       marginRight: align === "right" ? 0 : "auto",
                     }}
                   >
-                    <Image
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={block.src}
                       alt={block.alt}
-                      width={1200}
-                      height={800}
-                      sizes="(max-width: 820px) 100vw, 760px"
-                      unoptimized={!canOptimizeImage(block.src)}
                     />
                     {block.caption ? <figcaption>{block.caption}</figcaption> : null}
                   </figure>
@@ -148,26 +134,35 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                 </div>
               </div>
 
-              {relatedPosts.length > 0 ? (
-                <div className="related-tree" id="article-related">
-                  <div className="tree-line" aria-hidden="true">
-                    <span className="node node-core" />
-                    <span className="node node-a" />
-                    <span className="node node-b" />
-                  </div>
-                  <h3>Related articles</h3>
-                  <div className="related-list">
-                    {relatedPosts.map((related) => (
-                      <Link key={related.slug} href={`/blog/${related.slug}`}>
-                        <p className="meta">{related.category.replace(/-/g, " ")}</p>
-                        <h4>{related.title}</h4>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
             </aside>
           </section>
+
+          {post.showRelated !== false && relatedPosts.length > 0 ? (
+            <section className="related-network" id="article-related" aria-labelledby="related-network-title">
+              <div className="related-network-heading">
+                <p className="eyebrow">Connected reading</p>
+                <h2 id="related-network-title">Related articles</h2>
+                <p>Follow the connections to explore ideas that build on this one.</p>
+              </div>
+              <div className="related-network-grid">
+                {relatedPosts.map((related, index) => (
+                  <Link className="related-network-card" key={related.slug} href={`/blog/${related.slug}`}>
+                    <span className="related-network-node" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="related-network-image">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={related.coverImage} alt={related.coverAlt} loading="lazy" />
+                    </span>
+                    <span className="related-network-copy">
+                      <span className="meta">{related.category.replace(/-/g, " ")}</span>
+                      <strong>{related.title}</strong>
+                      <span className="related-network-excerpt">{related.excerpt}</span>
+                      <span className="related-network-open">Read article <span aria-hidden="true">↗</span></span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </main>
         <SiteFooter />
       </div>
