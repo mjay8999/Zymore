@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { upload } from "@vercel/blob/client";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
@@ -41,6 +42,9 @@ function createImageBlock(): ContentBlock {
     src: "",
     alt: "",
     caption: "",
+    width: 100,
+    align: "center",
+    frame: true,
   };
 }
 
@@ -506,6 +510,29 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <>
+                        <label>Image preview</label>
+                        <div
+                          className="admin-image-preview-stage"
+                          style={{
+                            justifyContent:
+                              (block.align ?? "center") === "left"
+                                ? "flex-start"
+                                : (block.align ?? "center") === "right"
+                                  ? "flex-end"
+                                  : "center",
+                          }}
+                        >
+                          <div
+                            className={`admin-image-preview${block.frame === false ? "" : " framed"}`}
+                            style={{ width: `${block.width ?? 100}%` }}
+                          >
+                            {block.src ? (
+                              <Image src={block.src} alt={block.alt} width={800} height={533} unoptimized />
+                            ) : (
+                              <span>Image frame</span>
+                            )}
+                          </div>
+                        </div>
                         <label>Upload image</label>
                         <input
                           type="file"
@@ -537,6 +564,47 @@ export default function AdminPage() {
                             updateBlock(block.id, () => ({ ...block, caption: event.target.value }))
                           }
                         />
+                        <label>Image width ({block.width ?? 100}%)</label>
+                        <input
+                          type="range"
+                          min={25}
+                          max={100}
+                          step={5}
+                          value={block.width ?? 100}
+                          onChange={(event) =>
+                            updateBlock(block.id, () => ({ ...block, width: Number(event.target.value) }))
+                          }
+                        />
+                        <div className="admin-row">
+                          <div>
+                            <label>Alignment</label>
+                            <select
+                              value={block.align ?? "center"}
+                              onChange={(event) =>
+                                updateBlock(block.id, () => ({
+                                  ...block,
+                                  align: event.target.value as "left" | "center" | "right",
+                                }))
+                              }
+                            >
+                              <option value="left">Left</option>
+                              <option value="center">Center</option>
+                              <option value="right">Right</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label>Frame</label>
+                            <select
+                              value={block.frame === false ? "none" : "bordered"}
+                              onChange={(event) =>
+                                updateBlock(block.id, () => ({ ...block, frame: event.target.value === "bordered" }))
+                              }
+                            >
+                              <option value="bordered">Bordered</option>
+                              <option value="none">No frame</option>
+                            </select>
+                          </div>
+                        </div>
                       </>
                     )}
                   </article>
