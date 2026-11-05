@@ -38,6 +38,14 @@ export type BlogPost = {
 const postsFilePath = path.join(process.cwd(), "data", "posts.json");
 const postsBlobPath = "content/posts.json";
 
+function hasBlobConnection(): boolean {
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+      (process.env.BLOB_STORE_ID &&
+        (process.env.VERCEL === "1" || process.env.VERCEL_OIDC_TOKEN)),
+  );
+}
+
 function normalizePosts(raw: unknown): BlogPost[] {
   if (!Array.isArray(raw)) {
     return [];
@@ -81,7 +89,7 @@ export function formatPublishedDate(input: string): string {
 
 export async function getAllPosts(): Promise<BlogPost[]> {
   let parsed: unknown;
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (hasBlobConnection()) {
     const { blobs } = await list({ prefix: postsBlobPath, limit: 1 });
     if (blobs[0]) {
       const response = await fetch(blobs[0].url, { cache: "no-store" });
@@ -120,7 +128,7 @@ export function getRelatedPosts(post: BlogPost, allPosts: BlogPost[]): BlogPost[
 
 export async function savePosts(posts: BlogPost[]): Promise<void> {
   const contents = JSON.stringify(posts, null, 2);
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (hasBlobConnection()) {
     await put(postsBlobPath, contents, {
       access: "public",
       addRandomSuffix: false,
