@@ -1,0 +1,9 @@
+node_modules
+.next
+.vercel
+out
+coverage
+*.log
+.env*
+!.env.example
+data/contact-inquiries.json

@@ -1,0 +1,156 @@
+[
+  {
+    "slug": "ai-safety-automation-guardrails",
+    "title": "How AI Safety Guardrails Improve B2B Workflow Reliability",
+    "excerpt": "A framework to make automation deterministic, auditable, and safer at scale.",
+    "readTime": "7 min read",
+    "published": "2026-10-23",
+    "team": "AI Safety",
+    "category": "ai-safety",
+    "topics": ["AI safety", "Governance", "Reliability"],
+    "coverImage": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80",
+    "coverAlt": "Security lock and digital network",
+    "relatedSlugs": [
+      "cybersecurity-workflow-blueprint",
+      "healthcare-automation-compliance"
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "paragraph",
+        "text": "High-performing AI workflows are not only fast. They are bounded by explicit safety behavior under normal and failure modes.",
+        "fontSize": 21
+      },
+      {
+        "id": "b2",
+        "type": "paragraph",
+        "text": "At Zymore, every production automation includes action-level logging, approval thresholds, and fallback queues to keep teams in control.",
+        "fontSize": 20
+      },
+      {
+        "id": "b3",
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80",
+        "alt": "Abstract circuit board",
+        "caption": "Guardrails should be designed before scaling automation volume."
+      },
+      {
+        "id": "b4",
+        "type": "paragraph",
+        "text": "This approach improves trust across operations, legal, and executive teams while preserving deployment speed.",
+        "fontSize": 20
+      }
+    ]
+  },
+  {
+    "slug": "cybersecurity-workflow-blueprint",
+    "title": "Cybersecurity Automation Blueprint For B2B Operations",
+    "excerpt": "Practical architecture for incident prevention, containment, and policy-driven response.",
+    "readTime": "9 min read",
+    "published": "2026-10-12",
+    "team": "Security Engineering",
+    "category": "cybersecurity",
+    "topics": ["Cybersecurity", "Automation", "Incident response"],
+    "coverImage": "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=1600&q=80",
+    "coverAlt": "Blue server lights",
+    "relatedSlugs": [
+      "ai-safety-automation-guardrails",
+      "effects-of-ai-on-human-body-fatigue"
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "paragraph",
+        "text": "Cybersecurity automation is strongest when it combines deterministic triggers with human-verified escalation paths.",
+        "fontSize": 21
+      },
+      {
+        "id": "b2",
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=1400&q=80",
+        "alt": "Control room screens",
+        "caption": "Visibility and response automation must run as one system."
+      },
+      {
+        "id": "b3",
+        "type": "paragraph",
+        "text": "By standardizing evidence capture and response tasks, teams reduce response time and improve recovery consistency.",
+        "fontSize": 20
+      }
+    ]
+  },
+  {
+    "slug": "healthcare-automation-compliance",
+    "title": "AI In Healthcare Operations: Compliance-First Automation",
+    "excerpt": "How healthcare teams can automate responsibly while protecting patient-sensitive workflows.",
+    "readTime": "8 min read",
+    "published": "2026-09-28",
+    "team": "Healthcare Systems",
+    "category": "ai-healthcare",
+    "topics": ["Healthcare AI", "Compliance", "Workflow design"],
+    "coverImage": "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1600&q=80",
+    "coverAlt": "Medical workspace",
+    "relatedSlugs": [
+      "ai-safety-automation-guardrails",
+      "effects-of-ai-on-human-body-fatigue"
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "paragraph",
+        "text": "Healthcare automation must align with strict privacy expectations while improving the speed and quality of care operations.",
+        "fontSize": 21
+      },
+      {
+        "id": "b2",
+        "type": "paragraph",
+        "text": "We design queue management, data handoff, and review loops with policy checkpoints that support clinical accountability.",
+        "fontSize": 20
+      },
+      {
+        "id": "b3",
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1400&q=80",
+        "alt": "Doctor with digital tablet",
+        "caption": "Compliance should be embedded directly inside workflow design."
+      }
+    ]
+  },
+  {
+    "slug": "effects-of-ai-on-human-body-fatigue",
+    "title": "Effects Of AI On Human Body: Cognitive Load And Fatigue",
+    "excerpt": "A practical look at how high-frequency AI interaction changes work intensity and attention cycles.",
+    "readTime": "6 min read",
+    "published": "2026-09-10",
+    "team": "Applied Research",
+    "category": "ai-human-body-effects",
+    "topics": ["Human factors", "AI impact", "Work design"],
+    "coverImage": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80",
+    "coverAlt": "Human silhouette with digital lines",
+    "relatedSlugs": [
+      "healthcare-automation-compliance",
+      "cybersecurity-workflow-blueprint"
+    ],
+    "blocks": [
+      {
+        "id": "b1",
+        "type": "paragraph",
+        "text": "AI can improve speed, but poorly designed usage loops can increase context switching, cognitive fatigue, and low-quality decision cycles.",
+        "fontSize": 21
+      },
+      {
+        "id": "b2",
+        "type": "paragraph",
+        "text": "Organizations should define attention-safe workflow windows, review cadences, and interruption thresholds.",
+        "fontSize": 20
+      },
+      {
+        "id": "b3",
+        "type": "image",
+        "src": "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=1400&q=80",
+        "alt": "Research screen with charts",
+        "caption": "Measure operational outcomes alongside human workload metrics."
+      }
+    ]
+  }
+]
