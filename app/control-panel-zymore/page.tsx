@@ -124,6 +124,16 @@ export default function AdminPage() {
         .filter(Boolean),
     };
 
+    if (!payload.coverImage.trim()) {
+      setStatus("Add a cover image by uploading one or entering an HTTPS image URL.");
+      return;
+    }
+    const emptyImageBlock = payload.blocks.find((block) => block.type === "image" && !block.src.trim());
+    if (emptyImageBlock) {
+      setStatus("Upload an image or enter an HTTPS image URL for each image block.");
+      return;
+    }
+
     const response = await fetch("/api/control-panel-zymore/posts", {
       method: "POST",
       headers: {
@@ -400,7 +410,7 @@ export default function AdminPage() {
                   placeholder={relatedOptions.map((post) => post.slug).join(", ")}
                 />
 
-                <label>Cover image</label>
+                <label>Cover image (required)</label>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/avif"
