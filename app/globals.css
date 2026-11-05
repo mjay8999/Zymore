@@ -857,6 +857,17 @@ h1 {
   border-color: var(--ink);
 }
 
+.admin-actions .danger {
+  margin-left: auto;
+  border-color: #d8b9b2;
+  background: #fff8f6;
+  color: #8b3930;
+}
+
+.admin-actions .danger:hover {
+  background: #f8eae6;
+}
+
 .admin-status {
   margin: 2px 0 0;
   color: #5f5953;

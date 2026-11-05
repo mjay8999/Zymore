@@ -143,3 +143,55 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true, post: payload });
 }
+
+export async function DELETE(request: Request) {
+  const allowed = await checkAdminAccess();
+  if (!allowed) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ message: "Invalid request origin." }, { status: 403 });
+  }
+
+  const parsed = await readLimitedJson(request, 2_000);
+  if (!parsed.ok) {
+    const status = parsed.reason === "too-large" ? 413 : 400;
+    return NextResponse.json({ message: "Invalid delete request." }, { status });
+  }
+
+  const slug =
+    parsed.value && typeof parsed.value === "object" && "slug" in parsed.value && typeof parsed.value.slug === "string"
+      ? parsed.value.slug
+      : "";
+  if (!SLUG_PATTERN.test(slug)) {
+    return NextResponse.json({ message: "Invalid article slug." }, { status: 400 });
+  }
+
+  let posts: BlogPost[];
+  try {
+    posts = await getAllPosts();
+  } catch {
+    return NextResponse.json({ message: "Blog storage is unavailable." }, { status: 503 });
+  }
+
+  if (!posts.some((post) => post.slug === slug)) {
+    return NextResponse.json({ message: "Article not found." }, { status: 404 });
+  }
+
+  try {
+    await savePosts(
+      posts
+        .filter((post) => post.slug !== slug)
+        .map((post) => ({
+          ...post,
+          relatedSlugs: post.relatedSlugs.filter((relatedSlug) => relatedSlug !== slug),
+        })),
+    );
+  } catch {
+    return NextResponse.json({ message: "Could not delete the article. Check the Vercel Blob connection." }, { status: 503 });
+  }
+
+  return NextResponse.json({ ok: true, deletedSlug: slug });
+}
