@@ -7,6 +7,21 @@ import { readLimitedJson } from "@/lib/read-limited-json";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+function logStorageFailure(operation: string, error: unknown) {
+  const isError = error instanceof Error;
+  const message = isError
+    ? error.message
+        .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+        .replace(/(token=)[^\s&]+/gi, "$1[redacted]")
+        .replace(/vercel_blob_rw_[a-z0-9_-]+/gi, "[redacted]")
+    : "Unknown storage error";
+
+  console.error(`[control-panel-zymore] ${operation} failed`, {
+    errorName: isError ? error.name : "UnknownError",
+    message,
+  });
+}
+
 function validatePost(raw: unknown): raw is BlogPost {
   if (!raw || typeof raw !== "object") {
     return false;
@@ -92,7 +107,8 @@ export async function GET() {
   let posts: BlogPost[];
   try {
     posts = await getAllPosts();
-  } catch {
+  } catch (error) {
+    logStorageFailure("load posts", error);
     return NextResponse.json({ message: "Blog storage is unavailable." }, { status: 503 });
   }
   return NextResponse.json(
@@ -126,7 +142,8 @@ export async function POST(request: Request) {
   let posts: BlogPost[];
   try {
     posts = await getAllPosts();
-  } catch {
+  } catch (error) {
+    logStorageFailure("load posts before save", error);
     return NextResponse.json({ message: "Blog storage is unavailable." }, { status: 503 });
   }
   const nextPosts = [...posts];
@@ -140,7 +157,8 @@ export async function POST(request: Request) {
 
   try {
     await savePosts(nextPosts);
-  } catch {
+  } catch (error) {
+    logStorageFailure("save posts", error);
     return NextResponse.json({ message: "Could not save the article. Check the Vercel Blob connection." }, { status: 503 });
   }
 
@@ -175,7 +193,8 @@ export async function DELETE(request: Request) {
   let posts: BlogPost[];
   try {
     posts = await getAllPosts();
-  } catch {
+  } catch (error) {
+    logStorageFailure("load posts before delete", error);
     return NextResponse.json({ message: "Blog storage is unavailable." }, { status: 503 });
   }
 
@@ -192,7 +211,8 @@ export async function DELETE(request: Request) {
           relatedSlugs: post.relatedSlugs.filter((relatedSlug) => relatedSlug !== slug),
         })),
     );
-  } catch {
+  } catch (error) {
+    logStorageFailure("delete post", error);
     return NextResponse.json({ message: "Could not delete the article. Check the Vercel Blob connection." }, { status: 503 });
   }
 
