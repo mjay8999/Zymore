@@ -78,6 +78,9 @@ function getPostValidationError(raw: unknown): string | null {
   if (!Array.isArray(post.relatedSlugs) || post.relatedSlugs.length > 50 || !post.relatedSlugs.every((slug) => typeof slug === "string" && SLUG_PATTERN.test(slug))) {
     return "Check the related article slugs. Use lowercase letters, numbers, and hyphens.";
   }
+  if (post.showRelated !== undefined && typeof post.showRelated !== "boolean") {
+    return "Choose whether related articles are visible on this article page.";
+  }
   if (!Array.isArray(post.blocks) || post.blocks.length > 100) {
     return "An article can contain up to 100 text and image blocks.";
   }

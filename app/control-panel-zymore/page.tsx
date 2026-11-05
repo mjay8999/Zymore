@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import { upload } from "@vercel/blob/client";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
@@ -61,6 +60,7 @@ function createDraft(): BlogPost {
     coverImage: "",
     coverAlt: "",
     relatedSlugs: [],
+    showRelated: true,
     blocks: [createParagraphBlock()],
   };
 }
@@ -70,7 +70,6 @@ export default function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [draft, setDraft] = useState<BlogPost>(createDraft());
   const [topicsInput, setTopicsInput] = useState("");
-  const [relatedInput, setRelatedInput] = useState("");
   const [selectedSlug, setSelectedSlug] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
@@ -107,7 +106,6 @@ export default function AdminPage() {
 
     setDraft(existing);
     setTopicsInput(existing.topics.join(", "));
-    setRelatedInput(existing.relatedSlugs.join(", "));
     setStatus(`Loaded ${existing.title}`);
   };
 
@@ -117,10 +115,6 @@ export default function AdminPage() {
       topics: topicsInput
         .split(",")
         .map((topic) => topic.trim())
-        .filter(Boolean),
-      relatedSlugs: relatedInput
-        .split(",")
-        .map((slug) => slug.trim())
         .filter(Boolean),
     };
 
@@ -179,7 +173,6 @@ export default function AdminPage() {
       setSelectedSlug("");
       setDraft(createDraft());
       setTopicsInput("");
-      setRelatedInput("");
       setStatus("Article deleted.");
     } catch {
       setStatus("Delete failed. Check your connection and try again.");
@@ -403,12 +396,55 @@ export default function AdminPage() {
                   placeholder="AI safety, Cybersecurity, Healthcare"
                 />
 
-                <label>Related slugs (comma separated)</label>
-                <input
-                  value={relatedInput}
-                  onChange={(event) => setRelatedInput(event.target.value)}
-                  placeholder={relatedOptions.map((post) => post.slug).join(", ")}
-                />
+                <section className="related-admin-panel" aria-labelledby="related-admin-heading">
+                  <div className="related-admin-heading">
+                    <div>
+                      <p className="eyebrow">Article connections</p>
+                      <h3 id="related-admin-heading">Related articles</h3>
+                      <p>Choose which articles connect to this one. Their cover images appear in its related section.</p>
+                    </div>
+                    <label className="admin-check-row related-visibility">
+                      <input
+                        type="checkbox"
+                        checked={draft.showRelated !== false}
+                        onChange={(event) => setDraft({ ...draft, showRelated: event.target.checked })}
+                      />
+                      Show on article page
+                    </label>
+                  </div>
+                  {relatedOptions.length > 0 ? (
+                    <div className="related-admin-options">
+                      {relatedOptions.map((post) => {
+                        const checked = draft.relatedSlugs.includes(post.slug);
+                        return (
+                          <label className={`related-admin-option${checked ? " selected" : ""}`} key={post.slug}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setDraft((previous) => ({
+                                ...previous,
+                                relatedSlugs: checked
+                                  ? previous.relatedSlugs.filter((slug) => slug !== post.slug)
+                                  : [...previous.relatedSlugs, post.slug],
+                              }))}
+                            />
+                            {post.coverImage ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={post.coverImage} alt="" />
+                            ) : <span className="related-admin-placeholder" />}
+                            <span className="related-admin-option-copy">
+                              <strong>{post.title}</strong>
+                              <small>/{post.slug}</small>
+                            </span>
+                            <span className="related-admin-link-state">{checked ? "Linked" : "Link article"}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="related-admin-empty">Create another article to add a connection.</p>
+                  )}
+                </section>
 
                 <label>Cover image (required)</label>
                 <input
@@ -537,7 +573,10 @@ export default function AdminPage() {
                             style={{ width: `${block.width ?? 100}%` }}
                           >
                             {block.src ? (
-                              <Image src={block.src} alt={block.alt} width={800} height={533} unoptimized />
+                              <>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={block.src} alt={block.alt} />
+                              </>
                             ) : (
                               <span>Image frame</span>
                             )}
