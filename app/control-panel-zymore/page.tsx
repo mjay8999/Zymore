@@ -135,10 +135,40 @@ export default function AdminPage() {
     }
 
     setStatus("Article saved successfully.");
+    setSelectedSlug(payload.slug);
     const fresh = await fetch("/api/control-panel-zymore/posts", { cache: "no-store" });
     if (fresh.ok) {
       const data = (await fresh.json()) as AdminResponse;
       setPosts(data.posts);
+    }
+  };
+
+  const deleteSelectedPost = async () => {
+    if (!selectedSlug) return;
+    const selectedPost = posts.find((post) => post.slug === selectedSlug);
+    if (!selectedPost || !window.confirm(`Delete “${selectedPost.title}”? This cannot be undone.`)) return;
+
+    setStatus("Deleting article...");
+    try {
+      const response = await fetch("/api/control-panel-zymore/posts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: selectedSlug }),
+      });
+      const result = (await response.json().catch(() => null)) as { message?: string } | null;
+      if (!response.ok) {
+        setStatus(result?.message ?? "Delete failed. Check admin access and try again.");
+        return;
+      }
+
+      setPosts((current) => current.filter((post) => post.slug !== selectedSlug));
+      setSelectedSlug("");
+      setDraft(createDraft());
+      setTopicsInput("");
+      setRelatedInput("");
+      setStatus("Article deleted.");
+    } catch {
+      setStatus("Delete failed. Check your connection and try again.");
     }
   };
 
@@ -399,6 +429,11 @@ export default function AdminPage() {
                   <button type="button" className="primary" onClick={savePost}>
                     Save article
                   </button>
+                  {selectedSlug ? (
+                    <button type="button" className="danger" onClick={() => void deleteSelectedPost()}>
+                      Delete article
+                    </button>
+                  ) : null}
                 </div>
 
                 <p className="admin-status">{loading ? "Loading admin data..." : status}</p>
