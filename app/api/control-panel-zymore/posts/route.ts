@@ -22,69 +22,107 @@ function logStorageFailure(operation: string, error: unknown) {
   });
 }
 
-function validatePost(raw: unknown): raw is BlogPost {
-  if (!raw || typeof raw !== "object") {
+function isImageSource(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 2_000) return false;
+  if (value.startsWith("/") && !value.startsWith("//")) return true;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
     return false;
+  }
+}
+
+function getPostValidationError(raw: unknown): string | null {
+  if (!raw || typeof raw !== "object") {
+    return "Enter the article details and try again.";
   }
 
   const post = raw as Partial<BlogPost>;
-
-  const isImageSource = (value: unknown): value is string => {
-    if (typeof value !== "string" || value.length > 2_000) return false;
-    if (value.startsWith("/") && !value.startsWith("//")) return true;
-    try {
-      return new URL(value).protocol === "https:";
-    } catch {
-      return false;
-    }
-  };
-
-  const isBlock = (block: unknown) => {
-    if (!block || typeof block !== "object") return false;
-    const item = block as Record<string, unknown>;
-    if (typeof item.id !== "string" || item.id.length > 100) return false;
-
-    if (item.type === "paragraph") {
-      return (
-        typeof item.text === "string" &&
-        item.text.length <= 20_000 &&
-        typeof item.fontSize === "number" &&
-        Number.isFinite(item.fontSize) &&
-        item.fontSize >= 16 &&
-        item.fontSize <= 34
-      );
-    }
-
-    return (
-      item.type === "image" &&
-      isImageSource(item.src) &&
-      typeof item.alt === "string" &&
-      item.alt.length <= 300 &&
-      (item.caption === undefined || (typeof item.caption === "string" && item.caption.length <= 500)) &&
-      (item.width === undefined || (typeof item.width === "number" && Number.isInteger(item.width) && item.width >= 25 && item.width <= 100)) &&
-      (item.align === undefined || ["left", "center", "right"].includes(item.align as string)) &&
-      (item.frame === undefined || typeof item.frame === "boolean")
-    );
-  };
-
   const published = typeof post.published === "string" ? post.published : "";
   const parsedDate = new Date(`${published}T00:00:00Z`);
 
-  return (
-    typeof post.slug === "string" && SLUG_PATTERN.test(post.slug) &&
-    typeof post.title === "string" && post.title.trim().length > 0 && post.title.length <= 180 &&
-    typeof post.excerpt === "string" && post.excerpt.trim().length > 0 && post.excerpt.length <= 1_000 &&
-    typeof post.readTime === "string" && post.readTime.length <= 40 &&
-    /^\d{4}-\d{2}-\d{2}$/.test(published) &&
-    !Number.isNaN(parsedDate.getTime()) &&
-    parsedDate.toISOString().slice(0, 10) === published &&
-    typeof post.team === "string" && post.team.length <= 100 &&
-    typeof post.category === "string" && blogCategories.some((category) => category.slug === post.category) &&
-    Array.isArray(post.topics) && post.topics.length <= 20 && post.topics.every((topic) => typeof topic === "string" && topic.length <= 100) &&
-    isImageSource(post.coverImage) && typeof post.coverAlt === "string" && post.coverAlt.length <= 300 &&
-    Array.isArray(post.relatedSlugs) && post.relatedSlugs.length <= 50 && post.relatedSlugs.every((slug) => typeof slug === "string" && SLUG_PATTERN.test(slug)) &&
-    Array.isArray(post.blocks) && post.blocks.length <= 100 && post.blocks.every(isBlock)
-  );
+  if (typeof post.slug !== "string" || !SLUG_PATTERN.test(post.slug)) {
+    return "Enter a valid article slug using lowercase letters, numbers, and hyphens.";
+  }
+  if (typeof post.title !== "string" || post.title.trim().length === 0 || post.title.length > 180) {
+    return "Enter an article title (up to 180 characters).";
+  }
+  if (typeof post.excerpt !== "string" || post.excerpt.trim().length === 0 || post.excerpt.length > 1_000) {
+    return "Enter an article excerpt (up to 1,000 characters).";
+  }
+  if (typeof post.readTime !== "string" || post.readTime.length > 40) {
+    return "Enter a reading time (up to 40 characters).";
+  }
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(published) ||
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== published
+  ) {
+    return "Choose a valid publication date.";
+  }
+  if (typeof post.team !== "string" || post.team.length > 100) {
+    return "Enter a team name (up to 100 characters).";
+  }
+  if (typeof post.category !== "string" || !blogCategories.some((category) => category.slug === post.category)) {
+    return "Choose a valid article category.";
+  }
+  if (!Array.isArray(post.topics) || post.topics.length > 20 || !post.topics.every((topic) => typeof topic === "string" && topic.length <= 100)) {
+    return "Check the topics list. Each topic can be up to 100 characters, with at most 20 topics.";
+  }
+  if (!isImageSource(post.coverImage)) {
+    return "Add a cover image by uploading one or entering an HTTPS image URL.";
+  }
+  if (typeof post.coverAlt !== "string" || post.coverAlt.length > 300) {
+    return "Enter cover image alt text (up to 300 characters).";
+  }
+  if (!Array.isArray(post.relatedSlugs) || post.relatedSlugs.length > 50 || !post.relatedSlugs.every((slug) => typeof slug === "string" && SLUG_PATTERN.test(slug))) {
+    return "Check the related article slugs. Use lowercase letters, numbers, and hyphens.";
+  }
+  if (!Array.isArray(post.blocks) || post.blocks.length > 100) {
+    return "An article can contain up to 100 text and image blocks.";
+  }
+
+  for (const [index, block] of post.blocks.entries()) {
+    if (!block || typeof block !== "object") {
+      return `Article block ${index + 1} is invalid.`;
+    }
+    const item = block as Record<string, unknown>;
+    if (typeof item.id !== "string" || item.id.length > 100) {
+      return `Article block ${index + 1} needs a valid block ID.`;
+    }
+    if (item.type === "paragraph") {
+      if (typeof item.text !== "string" || item.text.length > 20_000) {
+        return `Paragraph ${index + 1} must be 20,000 characters or fewer.`;
+      }
+      if (typeof item.fontSize !== "number" || !Number.isFinite(item.fontSize) || item.fontSize < 16 || item.fontSize > 34) {
+        return `Set paragraph ${index + 1} font size between 16px and 34px.`;
+      }
+      continue;
+    }
+    if (item.type !== "image") {
+      return `Article block ${index + 1} must be a paragraph or image.`;
+    }
+    if (!isImageSource(item.src)) {
+      return `Upload an image or enter an HTTPS image URL for image block ${index + 1}.`;
+    }
+    if (typeof item.alt !== "string" || item.alt.length > 300) {
+      return `Enter alt text of 300 characters or fewer for image block ${index + 1}.`;
+    }
+    if (item.caption !== undefined && (typeof item.caption !== "string" || item.caption.length > 500)) {
+      return `Keep the caption for image block ${index + 1} to 500 characters or fewer.`;
+    }
+    if (item.width !== undefined && (typeof item.width !== "number" || !Number.isInteger(item.width) || item.width < 25 || item.width > 100)) {
+      return `Set image block ${index + 1} width between 25% and 100%.`;
+    }
+    if (item.align !== undefined && !["left", "center", "right"].includes(item.align as string)) {
+      return `Choose left, center, or right alignment for image block ${index + 1}.`;
+    }
+    if (item.frame !== undefined && typeof item.frame !== "boolean") {
+      return `Choose whether image block ${index + 1} has a frame.`;
+    }
+  }
+
+  return null;
 }
 
 async function checkAdminAccess() {
@@ -134,10 +172,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid or oversized JSON payload." }, { status });
   }
 
-  const payload = parsed.value;
-  if (!validatePost(payload)) {
-    return NextResponse.json({ message: "Invalid post payload" }, { status: 400 });
+  const validationError = getPostValidationError(parsed.value);
+  if (validationError) {
+    return NextResponse.json({ message: validationError }, { status: 400 });
   }
+  const payload = parsed.value as BlogPost;
 
   let posts: BlogPost[];
   try {
