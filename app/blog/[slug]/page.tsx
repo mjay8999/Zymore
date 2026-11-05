@@ -103,8 +103,17 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                   );
                 }
 
+                const align = block.align ?? "center";
                 return (
-                  <figure key={block.id} className="article-inline-image">
+                  <figure
+                    key={block.id}
+                    className={`article-inline-image${block.frame === false ? "" : " framed"}`}
+                    style={{
+                      width: `${block.width ?? 100}%`,
+                      marginLeft: align === "left" ? 0 : "auto",
+                      marginRight: align === "right" ? 0 : "auto",
+                    }}
+                  >
                     <Image
                       src={block.src}
                       alt={block.alt}

@@ -525,13 +525,21 @@ h1 {
 
 .article-inline-image {
   margin: 26px 0 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .article-inline-image img {
   width: 100%;
   border-radius: 4px;
-  border: 1px solid var(--line-soft);
   display: block;
+}
+
+.article-inline-image.framed {
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  background: var(--cream-alt);
 }
 
 .article-inline-image figcaption {
@@ -824,6 +832,43 @@ h1 {
 
 .article-format-help {
   margin: -4px 0 0;
+  color: #6d665f;
+  font-size: 0.78rem;
+}
+
+.admin-image-preview-stage {
+  display: flex;
+  align-items: center;
+  min-height: 112px;
+  padding: 10px;
+  border: 1px dashed var(--line-soft);
+  border-radius: 8px;
+  background: var(--cream-alt);
+}
+
+.admin-image-preview {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-image-preview.framed {
+  padding: 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.admin-image-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.admin-image-preview > span {
+  display: grid;
+  min-height: 84px;
+  place-items: center;
   color: #6d665f;
   font-size: 0.78rem;
 }

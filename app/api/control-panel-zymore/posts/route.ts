@@ -45,7 +45,10 @@ function validatePost(raw: unknown): raw is BlogPost {
       isImageSource(item.src) &&
       typeof item.alt === "string" &&
       item.alt.length <= 300 &&
-      (item.caption === undefined || (typeof item.caption === "string" && item.caption.length <= 500))
+      (item.caption === undefined || (typeof item.caption === "string" && item.caption.length <= 500)) &&
+      (item.width === undefined || (typeof item.width === "number" && Number.isInteger(item.width) && item.width >= 25 && item.width <= 100)) &&
+      (item.align === undefined || ["left", "center", "right"].includes(item.align as string)) &&
+      (item.frame === undefined || typeof item.frame === "boolean")
     );
   };
 

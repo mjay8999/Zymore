@@ -15,6 +15,9 @@ export type ContentBlock =
       src: string;
       alt: string;
       caption?: string;
+      width?: number;
+      align?: "left" | "center" | "right";
+      frame?: boolean;
     };
 
 export type BlogPost = {
