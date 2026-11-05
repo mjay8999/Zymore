@@ -20,7 +20,6 @@ Modular Next.js + TypeScript website for Zymore (AI automation and workflow deve
 - `/blog` - Blog overview with categories and image-first article gallery
 - `/blog/category/[category]` - Separate pages for each blog category
 - `/blog/[slug]` - Dynamic blog article pages with related-link tree
-- `/admin-access` - Private admin sign-in page
 - `/control-panel-zymore` - Protected article manager
 
 ## Run Locally
@@ -48,21 +47,6 @@ The existing `data/posts.json` is the seed content. When a connected Blob store 
 - Category definitions: update `lib/blog-categories.ts`.
 - Blog seed content: `data/posts.json`; live admin changes are stored in Vercel Blob after the store is connected.
 
-## Hidden Admin Composer
-The hidden admin page includes:
-- Article title/slug editor
-- Category selector
-- Cover image upload or URL + alt text
-- Rich block composer:
-	- paragraph blocks with adjustable font size
-	- inline image upload or URL with caption
-- Related article linking via slug
-
-Admin API:
-- `GET /api/control-panel-zymore/posts`
-- `POST /api/control-panel-zymore/posts`
-
-Admin sign-in uses a POST request and a signed, httpOnly session cookie. Set `ZYMORE_ADMIN_KEY` to a unique random secret of at least 32 characters, open `/admin-access`, and enter the key. Do not put the key in a URL.
 
 ## Blog Categories Implemented
 - AI Safety
