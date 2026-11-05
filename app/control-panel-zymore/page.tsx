@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
@@ -70,6 +70,7 @@ export default function AdminPage() {
   const [selectedSlug, setSelectedSlug] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const paragraphEditors = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -180,6 +181,66 @@ export default function AdminPage() {
       ...previous,
       blocks: previous.blocks.map((block) => (block.id === id ? updater(block) : block)),
     }));
+  };
+
+  const applyInlineFormat = (
+    id: string,
+    prefix: string,
+    suffix: string,
+    placeholder: string,
+    selectionOffset = prefix.length,
+  ) => {
+    const editor = paragraphEditors.current[id];
+    if (!editor) return;
+
+    const value = editor.value;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = value.slice(start, end);
+    const content = selected || placeholder;
+    const formatted = content
+      .split("\n")
+      .map((line) => `${prefix}${line}${suffix}`)
+      .join("\n");
+    const nextValue = `${value.slice(0, start)}${formatted}${value.slice(end)}`;
+    updateBlock(id, (block) => (block.type === "paragraph" ? { ...block, text: nextValue } : block));
+
+    const selectionStart = start + (selected ? 0 : selectionOffset);
+    const selectionEnd = selected
+      ? start + formatted.length
+      : selectionStart + content.length;
+    requestAnimationFrame(() => {
+      editor.focus();
+      editor.setSelectionRange(selectionStart, selectionEnd);
+    });
+  };
+
+  const applyLineFormat = (id: string, format: "h2" | "h3" | "bullet" | "numbered") => {
+    const editor = paragraphEditors.current[id];
+    if (!editor) return;
+
+    const value = editor.value;
+    const selectionStart = editor.selectionStart;
+    const selectionEnd = editor.selectionEnd;
+    const lineStart = value.lastIndexOf("\n", Math.max(0, selectionStart - 1)) + 1;
+    const lineBreak = value.indexOf("\n", selectionEnd);
+    const lineEnd = lineBreak < 0 ? value.length : lineBreak;
+    const selectedLines = value.slice(lineStart, lineEnd).split("\n");
+    const formattedLines = selectedLines.map((line, index) => {
+      const text = line.replace(/^\s*(?:#{1,3}\s+|[-*]\s+|\d+\.\s+)/, "");
+      if (format === "h2") return `## ${text}`;
+      if (format === "h3") return `### ${text}`;
+      if (format === "bullet") return `- ${text}`;
+      return `${index + 1}. ${text}`;
+    });
+    const formatted = formattedLines.join("\n");
+    const nextValue = `${value.slice(0, lineStart)}${formatted}${value.slice(lineEnd)}`;
+    updateBlock(id, (block) => (block.type === "paragraph" ? { ...block, text: nextValue } : block));
+
+    requestAnimationFrame(() => {
+      editor.focus();
+      editor.setSelectionRange(lineStart, lineStart + formatted.length);
+    });
   };
 
   const removeBlock = (id: string) => {
@@ -356,14 +417,44 @@ export default function AdminPage() {
 
                     {block.type === "paragraph" ? (
                       <>
-                        <label>Text</label>
+                        <label>Text and formatting</label>
+                        <div className="article-format-toolbar" role="toolbar" aria-label="Paragraph formatting">
+                          <button type="button" aria-label="Bold" title="Bold" onClick={() => applyInlineFormat(block.id, "**", "**", "bold text")}>
+                            Bold
+                          </button>
+                          <button type="button" aria-label="Italic" title="Italic" onClick={() => applyInlineFormat(block.id, "*", "*", "italic text")}>
+                            Italic
+                          </button>
+                          <button type="button" aria-label="Underline" title="Underline" onClick={() => applyInlineFormat(block.id, "__", "__", "underlined text")}>
+                            Underline
+                          </button>
+                          <button type="button" aria-label="Heading 2" title="Heading 2" onClick={() => applyLineFormat(block.id, "h2")}>
+                            H2
+                          </button>
+                          <button type="button" aria-label="Heading 3" title="Heading 3" onClick={() => applyLineFormat(block.id, "h3")}>
+                            H3
+                          </button>
+                          <button type="button" aria-label="Bulleted list" title="Bulleted list" onClick={() => applyLineFormat(block.id, "bullet")}>
+                            Bullets
+                          </button>
+                          <button type="button" aria-label="Numbered list" title="Numbered list" onClick={() => applyLineFormat(block.id, "numbered")}>
+                            Numbered
+                          </button>
+                          <button type="button" aria-label="Insert link" title="Insert link" onClick={() => applyInlineFormat(block.id, "[", "](https://example.com)", "link text", 1)}>
+                            Link
+                          </button>
+                        </div>
                         <textarea
+                          ref={(element) => {
+                            paragraphEditors.current[block.id] = element;
+                          }}
                           rows={5}
                           value={block.text}
                           onChange={(event) =>
                             updateBlock(block.id, () => ({ ...block, text: event.target.value }))
                           }
                         />
+                        <p className="article-format-help">Select text to style it. Headings and lists apply to selected lines; inline styles add example text when nothing is selected.</p>
                         <label>Font size ({block.fontSize}px)</label>
                         <input
                           type="range"

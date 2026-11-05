@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import ArticleRichText from "@/components/article-rich-text";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import {
@@ -98,13 +99,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
               {post.blocks.map((block) => {
                 if (block.type === "paragraph") {
                   return (
-                    <p
-                      key={block.id}
-                      className="article-paragraph"
-                      style={{ fontSize: `${block.fontSize}px` }}
-                    >
-                      {block.text}
-                    </p>
+                    <ArticleRichText key={block.id} text={block.text} fontSize={block.fontSize} />
                   );
                 }
 
