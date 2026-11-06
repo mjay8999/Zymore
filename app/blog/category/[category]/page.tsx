@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import BlogCard from "@/components/blog-card";
+import BlogExplorer from "@/components/blog-explorer";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import { blogCategories, getCategoryBySlug } from "@/lib/blog-categories";
-import { getPostsByCategory } from "@/lib/posts";
+import { getAllPosts } from "@/lib/posts";
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
@@ -41,32 +40,22 @@ export default async function BlogCategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const posts = await getPostsByCategory(categoryData.slug);
+  const posts = await getAllPosts();
+  const explorerPosts = posts.map(({ slug, title, excerpt, published, team, category, topics, coverImage, coverAlt }) => ({
+    slug, title, excerpt, published, team, category, topics, coverImage, coverAlt,
+  }));
 
   return (
     <div>
-      <div className="site-shell">
+      <div className="site-shell blog-shell">
         <SiteHeader active="blog" />
         <main>
-          <section className="blog-overview-head reveal">
-            <h1>{categoryData.label}</h1>
-            <p className="lead">{categoryData.description}</p>
-          </section>
-
-          <section className="blog-filter-row reveal delay-1" aria-label="Category links">
-            <Link href="/blog">All articles</Link>
-            {blogCategories.map((item) => (
-              <Link key={item.slug} href={`/blog/category/${item.slug}`}>
-                {item.label}
-              </Link>
-            ))}
-          </section>
-
-          <section className="blog-gallery reveal delay-2">
-            {posts.map((post, index) => (
-              <BlogCard key={post.slug} post={post} index={index} />
-            ))}
-          </section>
+          <BlogExplorer
+            posts={explorerPosts}
+            categories={blogCategories}
+            initialCategory={categoryData.slug}
+            categoryTitle={categoryData.label}
+          />
         </main>
         <SiteFooter />
       </div>

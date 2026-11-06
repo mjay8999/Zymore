@@ -149,13 +149,11 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                 <section className="related-sidebar" aria-labelledby="related-sidebar-heading">
                   <div className="related-sidebar-network" aria-label="Connected articles">
                     <Link className="related-sidebar-node current" href="#article-start" aria-label="Current article">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={post.coverImage} alt="" />
+                      <span className="visually-hidden">Current article</span>
                     </Link>
                     {relatedPosts.slice(0, 4).map((related) => (
                       <Link className="related-sidebar-node" href={`/blog/${related.slug}`} key={related.slug} aria-label={related.title}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={related.coverImage} alt="" />
+                        <span className="visually-hidden">{related.title}</span>
                       </Link>
                     ))}
                   </div>
