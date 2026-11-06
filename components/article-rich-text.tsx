@@ -48,8 +48,9 @@ function isListLine(line: string): boolean {
   return /^\s*(?:[-*]\s+|\d+\.\s+)/.test(line);
 }
 
-function renderText(text: string): ReactNode[] {
+function renderText(text: string, headingIds: Array<{ lineIndex: number; id: string }>): ReactNode[] {
   const lines = text.replace(/\r\n?/g, "\n").replace(/<br\s*\/?>/gi, "\n\n").split("\n");
+  const idsByLine = new Map(headingIds.map(({ lineIndex, id }) => [lineIndex, id]));
   const nodes: ReactNode[] = [];
   let index = 0;
 
@@ -65,7 +66,9 @@ function renderText(text: string): ReactNode[] {
       const content = renderInline(heading[2], `heading-${index}`);
       const key = `heading-${index}`;
       nodes.push(
-        heading[1].length === 3 ? <h3 key={key}>{content}</h3> : <h2 key={key}>{content}</h2>,
+        heading[1].length === 3
+          ? <h3 id={idsByLine.get(index)} key={key}>{content}</h3>
+          : <h2 id={idsByLine.get(index)} key={key}>{content}</h2>,
       );
       index += 1;
       continue;
@@ -90,10 +93,18 @@ function renderText(text: string): ReactNode[] {
   return nodes;
 }
 
-export default function ArticleRichText({ text, fontSize }: { text: string; fontSize: number }) {
+export default function ArticleRichText({
+  text,
+  fontSize,
+  headingIds = [],
+}: {
+  text: string;
+  fontSize: number;
+  headingIds?: Array<{ lineIndex: number; id: string }>;
+}) {
   return (
     <div className="article-paragraph" style={{ fontSize: `${fontSize}px` }}>
-      {renderText(text)}
+      {renderText(text, headingIds)}
     </div>
   );
 }
