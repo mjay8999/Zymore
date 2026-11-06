@@ -19,6 +19,13 @@ type BlogDetailProps = {
 export const dynamic = "force-dynamic";
 
 const DEFAULT_AUTHOR_BYLINE = "By Jay Abhay Mehta | Founder & Principal Engineer, Zymore Labs";
+const COVER_ASPECT_RATIOS = {
+  "16:9": "16 / 9",
+  "3:2": "3 / 2",
+  "4:3": "4 / 3",
+  "1:1": "1 / 1",
+  "4:5": "4 / 5",
+} as const;
 
 export async function generateMetadata({ params }: BlogDetailProps): Promise<Metadata> {
   const { slug } = await params;
@@ -83,7 +90,11 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
             </nav>
 
             <article className="article-content" id="article-start">
-              <div className="article-cover image-cover" id="article-content">
+              <div
+                className="article-cover image-cover"
+                id="article-content"
+                style={{ aspectRatio: COVER_ASPECT_RATIOS[post.coverAspectRatio ?? "16:9"] }}
+              >
                 {/* Native image sizing uses each source's actual dimensions and keeps its original ratio. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

@@ -78,6 +78,12 @@ function getPostValidationError(raw: unknown): string | null {
   if (typeof post.coverAlt !== "string" || post.coverAlt.length > 300) {
     return "Enter cover image alt text (up to 300 characters).";
   }
+  if (
+    post.coverAspectRatio !== undefined &&
+    !["16:9", "3:2", "4:3", "1:1", "4:5"].includes(post.coverAspectRatio)
+  ) {
+    return "Choose a valid cover image frame ratio.";
+  }
   if (!Array.isArray(post.relatedSlugs) || post.relatedSlugs.length > 50 || !post.relatedSlugs.every((slug) => typeof slug === "string" && SLUG_PATTERN.test(slug))) {
     return "Check the related article slugs. Use lowercase letters, numbers, and hyphens.";
   }
