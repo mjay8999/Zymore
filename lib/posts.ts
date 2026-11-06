@@ -27,6 +27,7 @@ export type BlogPost = {
   readTime: string;
   published: string;
   team: string;
+  author?: string;
   category: string;
   topics: string[];
   coverImage: string;

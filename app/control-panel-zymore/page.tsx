@@ -16,6 +16,8 @@ type AdminResponse = {
   categories: Category[];
 };
 
+const DEFAULT_AUTHOR_BYLINE = "By Jay Abhay Mehta | Founder & Principal Engineer, Zymore Labs";
+
 function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -55,6 +57,7 @@ function createDraft(): BlogPost {
     readTime: "6 min read",
     published: new Date().toISOString().slice(0, 10),
     team: "Editorial",
+    author: DEFAULT_AUTHOR_BYLINE,
     category: "ai-safety",
     topics: [],
     coverImage: "",
@@ -405,6 +408,13 @@ export default function AdminPage() {
                     />
                   </div>
                 </div>
+
+                <label>Author byline</label>
+                <input
+                  value={draft.author ?? DEFAULT_AUTHOR_BYLINE}
+                  onChange={(event) => setDraft({ ...draft, author: event.target.value })}
+                  placeholder={DEFAULT_AUTHOR_BYLINE}
+                />
 
                 <label>Topics (comma separated)</label>
                 <input

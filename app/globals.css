@@ -330,6 +330,8 @@ h1 {
   max-width: 740px;
 }
 
+.article-byline { margin: 12px auto 0; max-width: 740px; color: var(--ink-soft); font-size: .82rem; letter-spacing: .015em; }
+
 .article-layout {
   margin-top: 20px;
   display: grid;
