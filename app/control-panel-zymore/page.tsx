@@ -280,6 +280,23 @@ export default function AdminPage() {
     });
   };
 
+  const insertParagraphBreak = (id: string) => {
+    const editor = paragraphEditors.current[id];
+    if (!editor) return;
+
+    const value = editor.value;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const marker = "<br>";
+    const nextValue = `${value.slice(0, start)}${marker}${value.slice(end)}`;
+    updateBlock(id, (block) => (block.type === "paragraph" ? { ...block, text: nextValue } : block));
+
+    requestAnimationFrame(() => {
+      editor.focus();
+      editor.setSelectionRange(start + marker.length, start + marker.length);
+    });
+  };
+
   const removeBlock = (id: string) => {
     setDraft((previous) => ({
       ...previous,
@@ -528,6 +545,9 @@ export default function AdminPage() {
                           <button type="button" aria-label="Insert link" title="Insert link" onClick={() => applyInlineFormat(block.id, "[", "](https://example.com)", "link text", 1)}>
                             Link
                           </button>
+                          <button type="button" aria-label="Insert paragraph break" title="Start a new paragraph here" onClick={() => insertParagraphBreak(block.id)}>
+                            New paragraph
+                          </button>
                         </div>
                         <textarea
                           ref={(element) => {
@@ -539,7 +559,7 @@ export default function AdminPage() {
                             updateBlock(block.id, () => ({ ...block, text: event.target.value }))
                           }
                         />
-                        <p className="article-format-help">Select text to style it. Headings and lists apply to selected lines; inline styles add example text when nothing is selected.</p>
+                        <p className="article-format-help">Each new line starts a paragraph. Pasted text keeps its line breaks; use the New paragraph button or type &lt;br&gt; to split a paragraph. Headings and lists still apply to selected lines.</p>
                         <label>Font size ({block.fontSize}px)</label>
                         <input
                           type="range"

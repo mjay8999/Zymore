@@ -49,7 +49,7 @@ function isListLine(line: string): boolean {
 }
 
 function renderText(text: string): ReactNode[] {
-  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  const lines = text.replace(/\r\n?/g, "\n").replace(/<br\s*\/?>/gi, "\n\n").split("\n");
   const nodes: ReactNode[] = [];
   let index = 0;
 
@@ -83,13 +83,8 @@ function renderText(text: string): ReactNode[] {
       continue;
     }
 
-    const paragraphLines: string[] = [];
-    const start = index;
-    while (index < lines.length && lines[index].trim() && !/^\s*#{1,3}\s+/.test(lines[index]) && !isListLine(lines[index])) {
-      paragraphLines.push(lines[index].trim());
-      index += 1;
-    }
-    nodes.push(<p key={`paragraph-${start}`}>{renderInline(paragraphLines.join(" "), `paragraph-${start}`)}</p>);
+    nodes.push(<p key={`paragraph-${index}`}>{renderInline(line.trim(), `paragraph-${index}`)}</p>);
+    index += 1;
   }
 
   return nodes;
