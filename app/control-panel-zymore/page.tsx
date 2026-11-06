@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import type { BlogPost, ContentBlock } from "@/lib/posts";
@@ -62,6 +62,7 @@ function createDraft(): BlogPost {
     topics: [],
     coverImage: "",
     coverAlt: "",
+    coverAspectRatio: "16:9",
     relatedSlugs: [],
     showRelated: true,
     blocks: [createParagraphBlock()],
@@ -115,6 +116,7 @@ export default function AdminPage() {
   const savePost = async () => {
     const payload: BlogPost = {
       ...draft,
+      coverAspectRatio: draft.coverAspectRatio ?? "16:9",
       topics: topicsInput
         .split(",")
         .map((topic) => topic.trim())
@@ -194,8 +196,8 @@ export default function AdminPage() {
 
     setStatus("Uploading image...");
     try {
-      const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(-150);
-      const blob = await upload(`articles/${Date.now()}-${safeName}`, file, {
+      const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(-100);
+      const blob = await uploadPresigned(`articles/${crypto.randomUUID()}-${safeName}`, file, {
         access: "public",
         handleUploadUrl: "/api/admin/uploads",
       });
@@ -489,6 +491,23 @@ export default function AdminPage() {
                   onChange={(event) => setDraft({ ...draft, coverImage: event.target.value })}
                   placeholder="https://..."
                 />
+
+                <label>Cover frame ratio</label>
+                <select
+                  value={draft.coverAspectRatio ?? "16:9"}
+                  onChange={(event) =>
+                    setDraft({
+                      ...draft,
+                      coverAspectRatio: event.target.value as NonNullable<BlogPost["coverAspectRatio"]>,
+                    })
+                  }
+                >
+                  <option value="16:9">Wide (16:9)</option>
+                  <option value="3:2">Landscape (3:2)</option>
+                  <option value="4:3">Standard (4:3)</option>
+                  <option value="1:1">Square (1:1)</option>
+                  <option value="4:5">Portrait (4:5)</option>
+                </select>
 
                 <label>Cover image alt text</label>
                 <input

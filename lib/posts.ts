@@ -32,6 +32,7 @@ export type BlogPost = {
   topics: string[];
   coverImage: string;
   coverAlt: string;
+  coverAspectRatio?: "16:9" | "3:2" | "4:3" | "1:1" | "4:5";
   relatedSlugs: string[];
   showRelated?: boolean;
   blocks: ContentBlock[];
