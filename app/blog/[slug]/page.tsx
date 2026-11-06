@@ -18,6 +18,8 @@ type BlogDetailProps = {
 
 export const dynamic = "force-dynamic";
 
+const DEFAULT_AUTHOR_BYLINE = "By Jay Abhay Mehta | Founder & Principal Engineer, Zymore Labs";
+
 export async function generateMetadata({ params }: BlogDetailProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -57,6 +59,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
             </p>
             <h1>{post.title}</h1>
             <p className="lead">{post.excerpt}</p>
+            <p className="article-byline">{post.author || DEFAULT_AUTHOR_BYLINE}</p>
           </section>
 
           <section className="article-layout reveal delay-1">

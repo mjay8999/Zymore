@@ -63,6 +63,9 @@ function getPostValidationError(raw: unknown): string | null {
   if (typeof post.team !== "string" || post.team.length > 100) {
     return "Enter a team name (up to 100 characters).";
   }
+  if (post.author !== undefined && (typeof post.author !== "string" || post.author.length > 180)) {
+    return "Keep the author byline to 180 characters or fewer.";
+  }
   if (typeof post.category !== "string" || !blogCategories.some((category) => category.slug === post.category)) {
     return "Choose a valid article category.";
   }
