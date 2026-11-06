@@ -36,6 +36,14 @@ export type BlogPost = {
   blocks: ContentBlock[];
 };
 
+export type ArticleHeading = {
+  id: string;
+  title: string;
+  level: 2 | 3;
+  blockId: string;
+  lineIndex: number;
+};
+
 const postsFilePath = path.join(process.cwd(), "data", "posts.json");
 const postsBlobPath = "content/posts.json";
 
@@ -125,6 +133,54 @@ export function getRelatedPosts(post: BlogPost, allPosts: BlogPost[]): BlogPost[
   return post.relatedSlugs
     .map((slug) => allPosts.find((candidate) => candidate.slug === slug))
     .filter((candidate): candidate is BlogPost => Boolean(candidate));
+}
+
+function headingLabel(markdown: string): string {
+  return markdown
+    .replace(/\[([^\]]+)\]\(https?:\/\/[^)\s]+\)/g, "$1")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/`(.*?)`/g, "$1")
+    .trim();
+}
+
+export function getArticleHeadings(post: BlogPost): ArticleHeading[] {
+  const headings: ArticleHeading[] = [];
+  const occurrences = new Map<string, number>();
+
+  for (const block of post.blocks) {
+    if (block.type !== "paragraph") continue;
+
+    const lines = block.text
+      .replace(/\r\n?/g, "\n")
+      .replace(/<br\s*\/?>/gi, "\n\n")
+      .split("\n");
+
+    lines.forEach((line, lineIndex) => {
+      const match = line.match(/^\s*#{1,3}\s+(.+)$/);
+      if (!match) return;
+
+      const title = headingLabel(match[1]);
+      const base = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || `section-${headings.length + 1}`;
+      const occurrence = (occurrences.get(base) ?? 0) + 1;
+      occurrences.set(base, occurrence);
+      const id = `article-${base}${occurrence > 1 ? `-${occurrence}` : ""}`;
+
+      headings.push({
+        id,
+        title,
+        level: /^\s*###/.test(line) ? 3 : 2,
+        blockId: block.id,
+        lineIndex,
+      });
+    });
+  }
+
+  return headings;
 }
 
 export async function savePosts(posts: BlogPost[]): Promise<void> {

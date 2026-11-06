@@ -6,6 +6,7 @@ import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import {
   formatPublishedDate,
+  getArticleHeadings,
   getAllPosts,
   getPostBySlug,
   getRelatedPosts,
@@ -43,6 +44,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
 
   const allPosts = await getAllPosts();
   const relatedPosts = getRelatedPosts(post, allPosts);
+  const articleHeadings = getArticleHeadings(post);
 
   return (
     <div>
@@ -58,22 +60,24 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
           </section>
 
           <section className="article-layout reveal delay-1">
-            <aside className="chapter-nav" aria-label="Article meta">
+            <nav className="chapter-nav" aria-label="On this page">
               <a href="#article-start">
                 <span>01</span>
                 <p>Overview</p>
               </a>
-              <a href="#article-content">
-                <span>02</span>
-                <p>Article</p>
-              </a>
+              {articleHeadings.map((heading, index) => (
+                <a className={`chapter-link level-${heading.level}`} href={`#${heading.id}`} key={heading.id}>
+                  <span>{String(index + 2).padStart(2, "0")}</span>
+                  <p>{heading.title}</p>
+                </a>
+              ))}
               {post.showRelated !== false && relatedPosts.length > 0 ? (
-                <a href="#article-related">
-                  <span>03</span>
-                  <p>Related links</p>
+                <a href="#article-related-all">
+                  <span>{String(articleHeadings.length + 2).padStart(2, "0")}</span>
+                  <p>Related articles</p>
                 </a>
               ) : null}
-            </aside>
+            </nav>
 
             <article className="article-content" id="article-start">
               <div className="article-cover image-cover" id="article-content">
@@ -88,7 +92,14 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
               {post.blocks.map((block) => {
                 if (block.type === "paragraph") {
                   return (
-                    <ArticleRichText key={block.id} text={block.text} fontSize={block.fontSize} />
+                    <ArticleRichText
+                      key={block.id}
+                      text={block.text}
+                      fontSize={block.fontSize}
+                      headingIds={articleHeadings
+                        .filter((heading) => heading.blockId === block.id)
+                        .map(({ lineIndex, id }) => ({ lineIndex, id }))}
+                    />
                   );
                 }
 
@@ -134,15 +145,45 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                 </div>
               </div>
 
+              {post.showRelated !== false && relatedPosts.length > 0 ? (
+                <section className="related-sidebar" aria-labelledby="related-sidebar-heading">
+                  <div className="related-sidebar-network" aria-label="Connected articles">
+                    <Link className="related-sidebar-node current" href="#article-start" aria-label="Current article">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={post.coverImage} alt="" />
+                    </Link>
+                    {relatedPosts.slice(0, 4).map((related) => (
+                      <Link className="related-sidebar-node" href={`/blog/${related.slug}`} key={related.slug} aria-label={related.title}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={related.coverImage} alt="" />
+                      </Link>
+                    ))}
+                  </div>
+                  <h3 id="related-sidebar-heading">Related articles</h3>
+                  <Link className="related-sidebar-card" href={`/blog/${relatedPosts[0].slug}`}>
+                    <span className="related-sidebar-image">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={relatedPosts[0].coverImage} alt={relatedPosts[0].coverAlt} />
+                    </span>
+                    <span className="related-sidebar-copy">
+                      <span className="meta">{relatedPosts[0].team} · {formatPublishedDate(relatedPosts[0].published)}</span>
+                      <strong>{relatedPosts[0].title}</strong>
+                    </span>
+                  </Link>
+                  {relatedPosts.length > 1 ? (
+                    <a className="related-sidebar-more" href="#article-related-all">View more <span aria-hidden="true">→</span></a>
+                  ) : null}
+                </section>
+              ) : null}
+
             </aside>
           </section>
 
           {post.showRelated !== false && relatedPosts.length > 0 ? (
-            <section className="related-network" id="article-related" aria-labelledby="related-network-title">
+            <section className="related-network" id="article-related-all" aria-labelledby="related-network-title">
               <div className="related-network-heading">
                 <p className="eyebrow">Connected reading</p>
                 <h2 id="related-network-title">Related articles</h2>
-                <p>Follow the connections to explore ideas that build on this one.</p>
               </div>
               <div className="related-network-grid">
                 {relatedPosts.map((related, index) => (
