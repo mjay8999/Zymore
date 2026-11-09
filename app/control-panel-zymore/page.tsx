@@ -430,7 +430,7 @@ export default function AdminPage() {
                     <div>
                       <p className="eyebrow">Article connections</p>
                       <h3 id="related-admin-heading">Related articles</h3>
-                      <p>Choose which articles connect to this one. Their cover images appear in its related section.</p>
+                      <p>Links connect both articles automatically. Their cover images appear in each related section.</p>
                     </div>
                     <label className="admin-check-row related-visibility">
                       <input
