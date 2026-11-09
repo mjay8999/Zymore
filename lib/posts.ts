@@ -85,6 +85,27 @@ function normalizePosts(raw: unknown): BlogPost[] {
   });
 }
 
+function normalizeRelatedLinks(posts: BlogPost[]): BlogPost[] {
+  const postSlugs = new Set(posts.map((post) => post.slug));
+  const linksBySlug = new Map<string, Set<string>>(
+    posts.map((post) => [
+      post.slug,
+      new Set(post.relatedSlugs.filter((slug) => slug !== post.slug && postSlugs.has(slug))),
+    ] as const),
+  );
+
+  for (const [slug, relatedSlugs] of linksBySlug) {
+    for (const relatedSlug of relatedSlugs) {
+      linksBySlug.get(relatedSlug)?.add(slug);
+    }
+  }
+
+  return posts.map((post) => ({
+    ...post,
+    relatedSlugs: [...(linksBySlug.get(post.slug) ?? [])],
+  }));
+}
+
 export function formatPublishedDate(input: string): string {
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) {
@@ -112,7 +133,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   } else {
     parsed = JSON.parse(await fs.readFile(postsFilePath, "utf8")) as unknown;
   }
-  const posts = normalizePosts(parsed);
+  const posts = normalizeRelatedLinks(normalizePosts(parsed));
 
   return posts.sort((a, b) => {
     const left = new Date(a.published).getTime();

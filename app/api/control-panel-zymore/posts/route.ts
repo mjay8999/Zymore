@@ -197,23 +197,34 @@ export async function POST(request: Request) {
     logStorageFailure("load posts before save", error);
     return NextResponse.json({ message: "Blog storage is unavailable." }, { status: 503 });
   }
-  const nextPosts = [...posts];
-  const index = nextPosts.findIndex((post) => post.slug === payload.slug);
+  const relatedSlugs = [...new Set(payload.relatedSlugs)].filter(
+    (slug) => slug !== payload.slug && posts.some((post) => post.slug === slug),
+  );
+  const savedPost = { ...payload, relatedSlugs };
+  const index = posts.findIndex((post) => post.slug === payload.slug);
+  const nextPosts = index >= 0
+    ? posts.map((post) => post.slug === payload.slug ? savedPost : post)
+    : [...posts, savedPost];
+  const selectedRelatedSlugs = new Set(relatedSlugs);
+  const synchronizedPosts = nextPosts.map((post) => {
+    if (post.slug === payload.slug) return post;
 
-  if (index >= 0) {
-    nextPosts[index] = payload;
-  } else {
-    nextPosts.push(payload);
-  }
+    const nextRelatedSlugs = post.relatedSlugs.filter((slug) => slug !== payload.slug);
+    if (selectedRelatedSlugs.has(post.slug)) {
+      nextRelatedSlugs.push(payload.slug);
+    }
+
+    return { ...post, relatedSlugs: nextRelatedSlugs };
+  });
 
   try {
-    await savePosts(nextPosts);
+    await savePosts(synchronizedPosts);
   } catch (error) {
     logStorageFailure("save posts", error);
     return NextResponse.json({ message: "Could not save the article. Check the Vercel Blob connection." }, { status: 503 });
   }
 
-  return NextResponse.json({ ok: true, post: payload });
+  return NextResponse.json({ ok: true, post: savedPost });
 }
 
 export async function DELETE(request: Request) {
