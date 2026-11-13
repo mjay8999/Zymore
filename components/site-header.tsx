@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 type SiteHeaderProps = {
-  active: "home" | "about" | "blog" | "none";
+  active: "home" | "about" | "publications" | "capabilities" | "blog" | "none";
 };
 
 export default function SiteHeader({ active }: SiteHeaderProps) {
@@ -14,6 +14,12 @@ export default function SiteHeader({ active }: SiteHeaderProps) {
         </Link>
         <Link href="/about" data-active={active === "about"}>
           About Us
+        </Link>
+        <Link href="/publications" data-active={active === "publications"}>
+          Publications
+        </Link>
+        <Link href="/technical-capabilities" data-active={active === "capabilities"}>
+          Capabilities
         </Link>
         <Link href="/blog" data-active={active === "blog"}>
           Blog
