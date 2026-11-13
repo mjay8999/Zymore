@@ -18,11 +18,11 @@ const urbanist = Urbanist({
 export const metadata: Metadata = {
   metadataBase: new URL("https://zymore.tech"),
   title: {
-    default: "Zymore | AI Automation & Workflow Development",
+    default: "Zymore Research | Independent AI Safety & Governance",
     template: "%s | Zymore",
   },
   description:
-    "Zymore builds AI automation and workflow systems for B2B brands and businesses.",
+    "Independent technical research in AI governance, applied safety, AI welfare, and secure LLM infrastructure.",
   alternates: {
     canonical: "/",
   },

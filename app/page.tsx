@@ -1,83 +1,76 @@
+import FeaturedArticles from "@/components/featured-articles";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
+import { getAllPosts } from "@/lib/posts";
 import Link from "next/link";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const posts = await getAllPosts();
+  const articles = posts.slice(0, 8).map(({ slug, title, excerpt, published, category, coverImage, coverAlt }) => ({
+    slug, title, excerpt, published, category, coverImage, coverAlt,
+  }));
+
   return (
-    <div>
-      <div className="site-shell">
-        <SiteHeader active="home" />
-        <main>
-          <section className="home-hero reveal">
-            <div className="hero-orbit" aria-hidden="true"><span /><span /><span /></div>
-            <div className="hero-center">
-              <p className="eyebrow">AI systems, made useful.</p>
-              <h1>Make work move.</h1>
-              <p className="lead">
-                We design and build thoughtful AI automation for the work that matters&mdash;so your team can spend less time
-                managing processes and more time moving forward.
-              </p>
-              <div className="hero-cta center">
-                <Link className="btn btn-primary" href="/contact">
-                  Talk with our team <span aria-hidden="true">&rarr;</span>
-                </Link>
-                <Link className="btn btn-ghost" href="/blog">
-                  Explore our thinking
-                </Link>
-              </div>
-              <p className="hero-note">A technology partner for ambitious teams</p>
+    <div className="site-shell">
+      <SiteHeader active="home" />
+      <main>
+        <section className="home-hero research-hero reveal">
+          <div className="hero-orbit" aria-hidden="true"><span /><span /><span /></div>
+          <div className="hero-center">
+            <p className="eyebrow">Independent research · Applied safety</p>
+            <h1>Zymore Research: Independent Technical AI Governance &amp; Applied Safety.</h1>
+            <p className="lead">
+              Deploying secure LLM infrastructure, conducting empirical AI welfare research, and
+              architecting multi-agent governance frameworks.
+            </p>
+            <div className="hero-cta center">
+              <a className="btn btn-primary" href="#our-work">
+                Check out our work <span aria-hidden="true">↓</span>
+              </a>
+              <Link className="btn btn-ghost" href="/publications">Explore publications <span aria-hidden="true">→</span></Link>
             </div>
-          </section>
+            <p className="hero-note">Research for safer, more accountable AI systems</p>
+          </div>
+        </section>
 
-          <section className="news-row reveal delay-1">
-            <article className="news-card">
-              <p className="meta">01 / Understand</p>
-              <h3>Find the useful work.</h3>
-              <p>We look closely at how your team works today and where better systems can make a real difference.</p>
-            </article>
-            <article className="news-card">
-              <p className="meta">02 / Design</p>
-              <h3>Make technology fit.</h3>
-              <p>We shape clear, dependable workflows around your people, your tools, and your goals.</p>
-            </article>
-            <article className="news-card">
-              <p className="meta">03 / Build</p>
-              <h3>Keep people in control.</h3>
-              <p>We build, refine, and support systems that earn trust as they take on more of the everyday.</p>
-            </article>
-          </section>
+        <section className="work-section reveal delay-1" id="our-work" aria-labelledby="work-title">
+          <div className="work-heading">
+            <p className="eyebrow">Research and experimentation</p>
+            <h2 id="work-title">Check out our work</h2>
+            <p>Explore the research and experimental projects developed across Zymore.</p>
+          </div>
+          <div className="work-grid">
+            <a className="work-card work-card-research" href="https://research.zymore.tech" target="_blank" rel="noreferrer">
+              <span className="work-card-index">01 / Research</span>
+              <span className="work-card-mark" aria-hidden="true">R</span>
+              <span className="work-card-title">Zymore Research</span>
+              <span className="work-card-description">Research papers and writing on AI safety, governance, and emerging technology.</span>
+              <span className="work-card-link">Visit research.zymore.tech <span aria-hidden="true">↗</span></span>
+            </a>
+            <a className="work-card work-card-labs" href="https://labs.zymore.tech" target="_blank" rel="noreferrer">
+              <span className="work-card-index">02 / Experiments</span>
+              <span className="work-card-mark" aria-hidden="true">L</span>
+              <span className="work-card-title">Zymore Labs</span>
+              <span className="work-card-description">Experimental projects in AI safety, red teaming, and applied systems.</span>
+              <span className="work-card-link">Visit labs.zymore.tech <span aria-hidden="true">↗</span></span>
+            </a>
+          </div>
+        </section>
 
-          <section className="links-showcase reveal delay-2">
-            <div className="link-heading">
-              <div><p className="eyebrow">The Zymore point of view</p><h2>Technology should feel like progress.</h2></div>
-              <Link href="/blog">Read our insights <span aria-hidden="true">&rarr;</span></Link>
-            </div>
-            <div className="link-grid">
-              <article className="feature-card feature-card-1">
-                <span className="visual visual-1" />
-                <p className="meta">Our approach</p><h4>Thoughtful by design.</h4>
-                <p>Good automation starts with a clear understanding of people, not a list of tools.</p>
-              </article>
-              <article className="feature-card feature-card-2">
-                <span className="visual visual-2" />
-                <p className="meta">Our craft</p><h4>Built for real work.</h4>
-                <p>We connect the systems you already use and make the handoffs feel effortless.</p>
-              </article>
-              <article className="feature-card feature-card-3">
-                <span className="visual visual-3" />
-                <p className="meta">Our standard</p><h4>Trust, built in.</h4>
-                <p>Clear boundaries, thoughtful safeguards, and people in the loop where it counts.</p>
-              </article>
-              <article className="feature-card feature-card-4">
-                <span className="visual visual-4" />
-                <p className="meta">Our belief</p><h4>Better, over time.</h4>
-                <p>Useful systems make room for your team to learn, adapt, and do its best work.</p>
-              </article>
-            </div>
-          </section>
-        </main>
-        <SiteFooter />
-      </div>
+        <FeaturedArticles articles={articles} />
+
+        <section className="home-resources reveal delay-2" aria-label="Explore more from Zymore">
+          <Link className="home-resource-link" href="/publications">
+            <span><span className="meta">Research archive</span><strong>Publications</strong></span>
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link className="home-resource-link" href="/technical-capabilities">
+            <span><span className="meta">Methods and infrastructure</span><strong>Technical capabilities</strong></span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
